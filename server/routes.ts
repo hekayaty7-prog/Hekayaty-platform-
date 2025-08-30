@@ -124,7 +124,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/characters", requireAuth, async (req: Request, res: Response) => {
     try {
       const body = insertCharacterSchema.parse(req.body);
-      const created = await supabaseStorage.createCharacter(body);
+      const created = await supabaseStorage.createCharacter({
+        name: body.name,
+        description: body.description,
+        role: body.role,
+        image: body.image
+      });
       if (!created) {
         return res.status(500).json({ message: "Could not create character" });
       }
@@ -1584,20 +1589,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Check if user already rated
-      const existingRating = await supabaseStorage.getRating(data.userId, data.storyId);
+      const existingRating = await supabaseStorage.getRating(data.userId.toString(), data.storyId.toString());
       
       let rating;
       if (existingRating) {
         rating = await supabaseStorage.updateRating(existingRating.id, {
           rating: data.rating,
-          review: data.review || ''
+          review: (data as any).review || ''
         });
       } else {
         rating = await supabaseStorage.createRating({
-          user_id: data.userId,
-          story_id: data.storyId,
+          user_id: data.userId.toString(),
+          story_id: data.storyId.toString(),
           rating: data.rating,
-          review: data.review || ''
+          review: (data as any).review || ''
         });
       }
       
