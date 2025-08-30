@@ -2,9 +2,11 @@
 
 A comprehensive fantasy story publishing and reading platform that allows users to discover, read, and publish stories and comics.
 
-**Live Site:** https://hekayaty-platforms.vercel.app
+## 🚀 Live Demo
 
-## 🌟 Features
+Visit the live application: [https://hekayaty-platforms.vercel.app](https://hekayaty-platforms.vercel.app)
+
+**Latest Update**: Backend API fully operational with TypeScript fixes deployed.
 
 ### For Readers
 - **Multi-format Content**: Read stories in text, PDF, audio, and image formats
