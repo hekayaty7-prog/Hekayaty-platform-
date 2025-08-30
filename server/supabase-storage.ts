@@ -119,23 +119,7 @@ export class SupabaseStorage {
     return data;
   }
 
-  async getChapters(storyId: string): Promise<any[]> {
-    console.log('Supabase getChapters called with storyId:', storyId);
-    
-    const { data, error } = await supabase
-      .from('story_chapters')
-      .select('*')
-      .eq('story_id', storyId)
-      .order('chapter_order');
-
-    if (error) {
-      console.error('Get chapters Supabase error:', error);
-      return [];
-    }
-
-    console.log('Supabase chapters result:', data);
-    return data || [];
-  }
+  // Removed duplicate - using improved version below
 
   async getAdjacentChapter(storyId: string, currentOrder: number, direction: 'prev' | 'next'): Promise<any | null> {
     const op = direction === 'prev' ? 'lt' : 'gt';
@@ -228,22 +212,7 @@ export class SupabaseStorage {
     return this.updateUserProfile(id, updates);
   }
 
-  async getAllGenres(): Promise<any[]> {
-    // Return hardcoded genres for now
-    return [
-      { id: 1, name: 'Romance', slug: 'romance' },
-      { id: 2, name: 'Mystery', slug: 'mystery' },
-      { id: 3, name: 'Fantasy', slug: 'fantasy' },
-      { id: 4, name: 'Science Fiction', slug: 'sci-fi' },
-      { id: 5, name: 'Thriller', slug: 'thriller' },
-      { id: 6, name: 'Horror', slug: 'horror' },
-      { id: 7, name: 'Adventure', slug: 'adventure' },
-      { id: 8, name: 'Drama', slug: 'drama' },
-      { id: 9, name: 'Comedy', slug: 'comedy' },
-      { id: 10, name: 'Historical Fiction', slug: 'historical' },
-      { id: 11, name: 'Hekayaty Original', slug: 'hekayaty_original' }
-    ];
-  }
+  // Removed duplicate - using database version below
 
   async getGenre(id: number): Promise<any> {
     const genres = await this.getAllGenres();
@@ -255,10 +224,7 @@ export class SupabaseStorage {
     return genres.find(g => g.slug === slug) || null;
   }
 
-  async getStoryGenres(storyId: string): Promise<any[]> {
-    // For now, return empty array - in full implementation would join with story_genres table
-    return [];
-  }
+  // Removed duplicate - using database version below
 
   async addStoryGenre(data: { storyId: string; genreId: string }): Promise<any> {
     // For now, return null - in full implementation would insert into story_genres table
@@ -900,6 +866,82 @@ export class SupabaseStorage {
     return true;
   }
 
+  // Workshop methods
+  async getWorkshops(): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('workshops')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Get workshops error:', error);
+      return [];
+    }
+
+    return data || [];
+  }
+
+  async createWorkshop(workshop: any): Promise<any | null> {
+    const { data, error } = await supabase
+      .from('workshops')
+      .insert(workshop)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Create workshop error:', error);
+      return null;
+    }
+
+    return data;
+  }
+
+  // Chapter methods
+  async getChapters(storyId: string): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('story_chapters')
+      .select('*')
+      .eq('story_id', storyId)
+      .order('chapter_order', { ascending: true });
+
+    if (error) {
+      console.error('Get chapters error:', error);
+      return [];
+    }
+
+    return data || [];
+  }
+
+  async updateChapter(id: string, updates: any): Promise<any | null> {
+    const { data, error } = await supabase
+      .from('story_chapters')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Update chapter error:', error);
+      return null;
+    }
+
+    return data;
+  }
+
+  async deleteChapter(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('story_chapters')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Delete chapter error:', error);
+      return false;
+    }
+
+    return true;
+  }
+
   // Purchase tracking methods
   async getUserPurchases(userId: string): Promise<{ stories: any[], novels: any[] }> {
     const { data: storyPurchases, error: storyError } = await supabase
@@ -942,6 +984,35 @@ export class SupabaseStorage {
     }
 
     return true;
+  }
+
+  // Genre methods
+  async getAllGenres(): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('genres')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) {
+      console.error('Get genres error:', error);
+      return [];
+    }
+
+    return data || [];
+  }
+
+  async getStoryGenres(storyId: string): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('story_genres')
+      .select('genres(*)')
+      .eq('story_id', storyId);
+
+    if (error) {
+      console.error('Get story genres error:', error);
+      return [];
+    }
+
+    return data?.map(sg => sg.genres) || [];
   }
 
   // Tales of Prophets content methods
