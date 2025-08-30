@@ -7,8 +7,8 @@
     "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
     "dev:client": "cd client && npm run dev",
     "dev:server": "tsx watch index.ts",
-    "build": "npm run build:client",
-    "build:client": "vite build",
+    "build": "cd client && npm install && npm run build",
+    "build:client": "cd client && vite build",
     "start": "tsx index.ts",
     "check": "tsc",
     "db:push": "drizzle-kit push"
